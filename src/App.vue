@@ -4,16 +4,21 @@
             <el-header class="sys-header">一张图项目系统</el-header>
             <el-container class="app-content-pannel">
                 <el-aside width="200px" class="sys-menu">左侧菜单</el-aside>
-                <el-main>地图区域</el-main>
+                <el-main id="map-padding">
+                    <MapView />
+                </el-main>
             </el-container>
         </el-container>
     </div>
 </template>
 
 <script>
+import MapView from './components/common/MapView';
 export default {
     name: 'App',
-    components: {},
+    components: {
+        MapView,
+    },
 };
 </script>
 
@@ -38,5 +43,8 @@ body,
 }
 .sys-menu {
     background-color: #c0c4cc;
+}
+#map-padding {
+    padding: 5px;
 }
 </style>
