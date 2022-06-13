@@ -1,5 +1,5 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
+import Vue from 'vue';
+import VueRouter from 'vue-router';
 import DataVisual from '../pages/DataVisual';
 import OneMap from '../pages/OneMap';
 
