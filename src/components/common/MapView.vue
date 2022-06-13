@@ -19,10 +19,24 @@ export default {
     },
     methods: {
         async _createMapView() {
-            const [Map, MapView] = await loadModules(['esri/Map', 'esri/views/MapView'], options); //2.加载模块
+            const [Map, MapView, Basemap, TileLayer] = await loadModules(
+                ['esri/Map', 'esri/views/MapView', 'esri/Basemap', 'esri/layers/TileLayer'],
+                options,
+            ); //2.加载模块
             //3.实例化地图
+            // create a basemap from a dynamic mapserver
+            let basemap = new Basemap({
+                baseLayers: [
+                    new TileLayer({
+                        url: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
+                        title: 'Basemap',
+                    }),
+                ],
+                title: 'basemap',
+                id: 'basemap',
+            });
             const map = new Map({
-                basemap: 'osm',
+                basemap, //basemap: 'basemap',报错
             });
             const mapview = new MapView({
                 container: 'mapview',
