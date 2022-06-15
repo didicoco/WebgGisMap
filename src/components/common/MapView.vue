@@ -18,7 +18,7 @@ export default {
     name: 'MapView',
     components: {},
     mounted: function () {
-        //console.log(this.$store.getters._getDefaultView);
+        console.log(this.$store.getters._getDefaultView);
         // console.log(this.$store.state._defaultView);
         this._createMapView(); //生命周期函数，钩子函数，挂载
     },
@@ -86,7 +86,7 @@ export default {
             });
             mapview.ui.add(zoom);
             mapview.ui.components = [];
-            this.$store.commit('_setDefaultView', mapview);
+            this.$store.commit('_setDefaultView', mapview); //把mapview配置到VUEX里，index.js，公共的view
         },
     },
 };
