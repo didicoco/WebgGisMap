@@ -22,7 +22,6 @@ export default {
                     this.$store.commit('_setDefaultMapTreeVisible', !currentVisible); //目录树的开关
                     break;
                 }
-
                 case 'distance':
                     break;
                 case 'area':
