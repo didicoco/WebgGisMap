@@ -17,9 +17,14 @@ export default {
         return {
             data: [
                 {
-                    label: '冷暖底图',
+                    label: '底图数据',
                     //添加图层需要layerid、layerurl两个属性
                     children: [
+                        {
+                            label: '原底图',
+                            layerid: 'layerid0',
+                            layerurl: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
+                        },
                         {
                             label: '暖色系图层',
                             layerid: 'layerid0',
@@ -33,7 +38,7 @@ export default {
                     ],
                 },
                 {
-                    label: '行政区划图层',
+                    label: '行政区划数据',
                     children: [
                         {
                             label: '省级',
@@ -53,23 +58,12 @@ export default {
                     ],
                 },
                 {
-                    label: '一级 3',
+                    label: '业务数据',
                     children: [
                         {
-                            label: '二级 3-1',
-                            children: [
-                                {
-                                    label: '三级 3-1-1',
-                                },
-                            ],
-                        },
-                        {
-                            label: '二级 3-2',
-                            children: [
-                                {
-                                    label: '三级 3-2-1',
-                                },
-                            ],
+                            label: '火车站点',
+                            layerid: 'layerid1',
+                            layerurl: '	https://localhost:6443/arcgis/rest/services/Map/Station/MapServer',
                         },
                     ],
                 },
@@ -92,12 +86,12 @@ export default {
                         //实例化目录树中加载的图层--添加切片地图
                         const layer = new TileLayer({ url: data.layerurl });
                         view.map.add(layer);
-                        console.log('你点了1');
+                        console.log(view.map.allLayers);
+                        console.log('你点了1，用TileLayer加载');
                     }
                     break;
                 case 'layerid1':
                     if (data.layerurl) {
-                        console.log('你点了2');
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
                         const resultLayer = view.map.findLayerById('layerid');
                         if (resultLayer) view.map.remove(resultLayer);
@@ -107,6 +101,8 @@ export default {
                             url: data.layerurl,
                         });
                         view.map.add(featureLayer);
+                        console.log(view.map.allLayers);
+                        console.log('你点了2，用FeatureLayer加载');
                     }
                     break;
                 default:
