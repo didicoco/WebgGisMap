@@ -17,7 +17,7 @@ export default {
         return {
             data: [
                 {
-                    label: '冷暖图层',
+                    label: '冷暖底图',
                     //添加图层需要layerid、layerurl两个属性
                     children: [
                         {
