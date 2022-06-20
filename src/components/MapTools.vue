@@ -15,8 +15,11 @@ export default {
         handleMapToolsitemClick(event) {
             console.log(event.target.id);
             switch (event.target.id) {
-                case 'xzqh':
+                case 'xzqh': {
+                    const currentVisible = this.$store.getters._getDefaultXZQHPannelVisible;
+                    this.$store.commit('_setDefaultXZQHPannelVisible', !currentVisible); //行政区划的开关
                     break;
+                }
                 case 'mls': {
                     const currentVisible = this.$store.getters._getDefaultMapTreeVisible;
                     this.$store.commit('_setDefaultMapTreeVisible', !currentVisible); //目录树的开关
