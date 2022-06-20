@@ -80,20 +80,20 @@ export default {
                 case 'layerid0':
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
-                        const resultLayer = view.map.findLayerById('layerid');
+                        const resultLayer = view.map.findLayerById('layerid0');
                         if (resultLayer) view.map.remove(resultLayer);
                         const [TileLayer] = await loadModules(['esri/layers/TileLayer'], options);
                         //实例化目录树中加载的图层--添加切片地图
                         const layer = new TileLayer({ url: data.layerurl });
                         view.map.add(layer);
-                        console.log(view.map.allLayers);
+                        // console.log(view.map.allLayers);
                         console.log('你点了1，用TileLayer加载');
                     }
                     break;
                 case 'layerid1':
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
-                        const resultLayer = view.map.findLayerById('layerid');
+                        const resultLayer = view.map.findLayerById('layerid1');
                         if (resultLayer) view.map.remove(resultLayer);
                         //实例化目录树中加载的图层--添加要素地图
                         const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
@@ -101,7 +101,7 @@ export default {
                             url: data.layerurl,
                         });
                         view.map.add(featureLayer);
-                        console.log(view.map.allLayers);
+                        // console.log(view.map.allLayers);
                         console.log('你点了2，用FeatureLayer加载');
                     }
                     break;
