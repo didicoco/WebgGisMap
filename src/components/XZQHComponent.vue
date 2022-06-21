@@ -66,7 +66,7 @@ export default {
             const _self = this;
             const [QueryTask, Query] = await loadModules(['esri/tasks/QueryTask', 'esri/tasks/support/Query'], options);
             const queryTask = new QueryTask({
-                url: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0',
+                url: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/2',
             });
             let query = new Query();
             query.returnGeometry = false; //如果true，则返回的FeatureSet中的每个特征都包含几何。
@@ -106,7 +106,7 @@ export default {
             let query = new Query();
             query.returnGeometry = false;
             query.outFields = ['*'];
-            query.where = '市代码 like' + provinceCode + '%';
+            query.where = "市代码 like '" + provinceCode + "%'";
 
             let results = await queryTask.execute(query);
             console.log(results);
@@ -123,12 +123,12 @@ export default {
                     currentCityData.map(async (item2) => {
                         const cityCode = item2.value.toString().substring(0, 4);
                         const queryTask2 = new QueryTask({
-                            url: 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/2',
+                            url: 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0',
                         });
                         let query2 = new Query();
                         query2.returnGeometry = false;
                         query2.outFields = ['*'];
-                        query2.where = '县代码 like' + cityCode + '%';
+                        query2.where = "县代码 like '" + cityCode + "%'";
 
                         const result2 = await queryTask2.execute(query2);
                         item2.children = result2.features;
