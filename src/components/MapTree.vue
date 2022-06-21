@@ -43,7 +43,7 @@ export default {
                         {
                             label: '省级',
                             layerid: 'layerid1',
-                            layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0',
+                            layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/2',
                         },
                         {
                             label: '市级',
@@ -53,7 +53,7 @@ export default {
                         {
                             label: '县级',
                             layerid: 'layerid1',
-                            layerurl: 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/2',
+                            layerurl: 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0',
                         },
                     ],
                 },
