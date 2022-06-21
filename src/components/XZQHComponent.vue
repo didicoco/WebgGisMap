@@ -155,6 +155,7 @@ export default {
 </script>
 
 <style>
+/* 设置最外层容器样式 */
 .XZQHComponent-pannel {
     position: absolute;
     top: 20px;
@@ -162,6 +163,7 @@ export default {
     width: 500px;
     height: 600px;
     background-color: #fff;
+    overflow: auto;
 }
 .XZQHComponent-header {
     width: 100%;
@@ -191,6 +193,18 @@ export default {
 }
 .XZQH-select-label {
     font-size: 13px;
+}
+/* 设置内容区样式 */
+.XZQH-content-pannel {
+    width: 100%;
+    height: 100%;
+    padding: 0 5px;
+}
+.XZQH-content-pannel span {
+    font-size: 14px;
+}
+.city-item {
+    color: red;
 }
 </style>
 
