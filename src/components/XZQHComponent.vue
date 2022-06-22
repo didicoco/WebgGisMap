@@ -9,7 +9,7 @@
             <el-select
                 v-model="provinceValue"
                 @change="handleProvinceValueChang"
-                size="mini"
+                size="small"
                 clearable
                 placeholder="请选择省份"
             >
@@ -21,7 +21,7 @@
             <tbody>
                 <tr v-for="item in cityAndCountyOptions" :key="item.label">
                     <td style="min-width: 50px">
-                        <span class="city-item" :value="item.value" @click="handleItemClick(item, value, 'city')">
+                        <span class="city-item" :value="item.value" @click="handleItemClick(item.value, 'city')">
                             {{ item.label }}
                         </span>
                     </td>
@@ -110,7 +110,7 @@ export default {
             //query.where = "code like" + "'" + provinceCode +  "%" + "'";
 
             let results = await queryTask.execute(query);
-            console.log(results);
+
             let currentCityData = [];
             if (results.features.length > 0) {
                 results.features.map((item) => {
@@ -146,6 +146,90 @@ export default {
             }
         },
 
+        //功能：定位跳转并高亮
+        async handleItemClick(val, type) {
+            let graphic = '';
+            let serverUrl = '';
+            let code = '';
+            const view = this.$store.getters._getDefaultView;
+            if (type === 'city') {
+                code = val.toString().substring(0, 4);
+                serverUrl = 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/1';
+            } else if (type === 'county') {
+                code = val.toString().substring(0, 6);
+                serverUrl = 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0';
+            }
+            const [QueryTask, Query, Graphic] = await loadModules(
+                ['esri/tasks/QueryTask', 'esri/tasks/support/Query', 'esri/Graphic'],
+                options,
+            );
+            const queryTask = new QueryTask({
+                url: serverUrl,
+            });
+            let query = new Query();
+            query.returnGeometry = true;
+            query.outFields = ['*'];
+            query.where = "Code like '" + code + "%'";
+
+            let results = await queryTask.execute(query);
+
+            //渲染和定位
+            const featuresResult = results.features[0];
+            // console.log(featuresResult);
+            if (graphic) {
+                view.graphics.remove(graphic);
+            }
+            const fillSymbol = {
+                type: 'simple-fill',
+                color: [188, 240, 234, 0.1],
+                outline: {
+                    color: '#00FFFF',
+                    width: 2,
+                },
+            };
+            graphic = new Graphic({
+                geometry: featuresResult.geometry,
+                symbol: fillSymbol,
+            });
+            view.graphics.add(graphic);
+            // console.log(graphic);
+
+            const screenPoint = {
+                x: featuresResult.geometry.extent.center.x,
+                y: featuresResult.geometry.extent.center.y,
+                spatialReference: {
+                    wkid: 3857, //网络墨卡托投影
+                },
+            };
+            console.log('screenPoint', screenPoint);
+            const mapPoint = view.toScreen(screenPoint); //将给定的X、Y转换为屏幕点
+            console.log('mapPoint', mapPoint);
+
+            const mapPoint1 = {
+                x: mapPoint.x,
+                y: mapPoint.y,
+                spatialReference: {
+                    wkid: 3857, //4326：GCS_WGS_1984
+                },
+            };
+            const screenPoint1 = view.toMap(mapPoint1); //将给定的屏幕点转换为地图点
+            console.log('screenPoint1', screenPoint1);
+
+            view.goTo({
+                center: [screenPoint1.longitude, screenPoint1.latitude],
+                zoom: 8,
+            });
+
+            // view.goTo({
+            //     center: [
+            //         featuresResult.geometry.extent.center.longitude,
+            //         featuresResult.geometry.extent.center.latitude,
+            //     ],
+            //     zoom: 8,
+            // });
+        },
+
+        //控制行政导航面板的v-show的值
         closeXZQHPannel() {
             let currentVisible = this.$store.getters._getDefaultXZQHPannelVisible;
             this.$store.commit('_setDefaultXZQHPannelVisible', !currentVisible); //
@@ -192,19 +276,27 @@ export default {
     margin: 5px 0;
 }
 .XZQH-select-label {
-    font-size: 13px;
+    font-size: 14px;
 }
 /* 设置内容区样式 */
 .XZQH-content-pannel {
     width: 100%;
     height: 100%;
-    padding: 0 5px;
+    padding: 5px 5px;
+    margin: 5px 5px;
 }
 .XZQH-content-pannel span {
     font-size: 14px;
 }
+.county-item {
+    cursor: pointer;
+}
 .city-item {
-    color: red;
+    font-weight: 600;
+    cursor: pointer;
+}
+.county-item:hover {
+    color: #409eff;
 }
 </style>
 
