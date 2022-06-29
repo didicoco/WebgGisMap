@@ -81,7 +81,9 @@ export default {
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
                         const resultLayer = view.map.findLayerById('layerid0');
-                        if (resultLayer) view.map.remove(resultLayer);
+                        if (resultLayer) {
+                            view.map.remove(resultLayer);
+                        }
                         const [TileLayer] = await loadModules(['esri/layers/TileLayer'], options);
                         //实例化目录树中加载的图层--添加切片地图
                         const layer = new TileLayer({ url: data.layerurl });
@@ -94,7 +96,9 @@ export default {
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
                         const resultLayer = view.map.findLayerById('layerid1');
-                        if (resultLayer) view.map.remove(resultLayer);
+                        if (resultLayer) {
+                            view.map.remove(resultLayer);
+                        }
                         //实例化目录树中加载的图层--添加要素地图
                         const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
                         const featureLayer = new FeatureLayer({

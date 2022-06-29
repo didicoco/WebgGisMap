@@ -48,7 +48,7 @@ const options = {
     url: 'https://js.arcgis.com/4.23/init.js',
     css: 'https://js.arcgis.com/4.23/esri/themes/light/main.css',
 };
-
+let graphic = '';
 export default {
     name: 'XZQHComponent',
     data() {
@@ -148,7 +148,6 @@ export default {
 
         //功能：定位跳转并高亮
         async handleItemClick(val, type) {
-            let graphic = '';
             let serverUrl = '';
             let code = '';
             const view = this.$store.getters._getDefaultView;
@@ -192,7 +191,7 @@ export default {
                 symbol: fillSymbol,
             });
             view.graphics.add(graphic);
-            // console.log(graphic);
+            console.log('graphic', graphic);
 
             const screenPoint = {
                 x: featuresResult.geometry.extent.center.x,
