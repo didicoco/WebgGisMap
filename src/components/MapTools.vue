@@ -81,16 +81,16 @@ export default {
             );
 
             const resultLayer = view.map.findLayerById('polygonGraphicLayer');
-            if (resultLayer) {
-                view.map.remove(resultLayer);
-            }
-            const graphicsLayer = new GraphicsLayer({
+            if (resultLayer) view.map.remove(resultLayer);
+
+            _self.graphicsLayer = new GraphicsLayer({
                 id: 'polygonGraphicLayer',
                 elevationInfo: {
                     mode: 'on-the-ground', //指定图形在垂直轴 (z) 上的放置方式,on-the-ground忽略Z值
                 },
             });
-            view.map.add(graphicsLayer);
+            view.map.add(_self.graphicsLayer);
+
             //定义面状区域的样式(符号化渲染)
             const polygonSymbol = {
                 type: 'simple-fill',
@@ -101,24 +101,29 @@ export default {
                     width: 1,
                 },
             };
+
             //自定义草图工具
-            var sketchViewModel = new SketchViewModel({
+            console.log('view', view);
+            console.log('_self.graphicsLayer', _self.graphicsLayer);
+            console.log('polygonSymbol', polygonSymbol);
+            _self.sketchViewModel = new SketchViewModel({
                 updateOnGraphicClick: false,
                 view,
-                layer: graphicsLayer,
+                layer: _self.graphicsLayer,
                 polygonSymbol,
             });
-            sketchViewModel.create('polygon'); //指定绘制的样式
+            console.log('_self.sketchViewModel', _self.sketchViewModel);
+            _self.sketchViewModel.create('polygon'); //指定绘制的样式
             //监听sketchViewModel的状态
-            sketchViewModel.on('create-complete', function (event) {
+            _self.sketchViewModel.on('create-complete', function (event) {
                 const graphic = new Graphic({
                     geometry: event.geometry,
-                    symbol: sketchViewModel.graphic.symbol,
+                    symbol: _self.sketchViewModel.graphic.symbol,
                 });
-                graphicsLayer.add(graphic);
+                _self.graphicsLayer.add(graphic);
             });
             //监听create状态，回调handleSpaceQuery方法去查询要素
-            sketchViewModel.on('create', function (event) {
+            _self.sketchViewModel.on('create', function (event) {
                 if (event.state === 'complete') {
                     _self.handleSpaceQuery(event.graphic);
                 }
@@ -126,6 +131,7 @@ export default {
         },
         //2、执行空间查询的方法
         handleSpaceQuery(graphic) {
+            console.log('调用handleSpaceQuery');
             const _self = this;
             const view = _self.$store.getters._getDefaultView;
             const resultLayer = view.map.findLayerById('layerid1');
