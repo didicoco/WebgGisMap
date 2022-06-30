@@ -29,7 +29,51 @@ const options = {
 };
 export default {
     name: 'MapTools',
+    mounted: function () {
+        const checkView = setInterval(() => {
+            if (this.$store.getters._getDefaultView) {
+                this._initSketchTool();
+                clearInterval(checkView);
+            }
+        }, 200);
+    },
     methods: {
+        /////单独创建绘图工具
+        async _initSketchTool() {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultMapView;
+            //1、绘制面状区域
+            const [SketchViewModel, GraphicsLayer] = await loadModules(
+                ['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer'],
+                options,
+            );
+            const resultLayer = view.map.findLayerById('polygonGraphicLayer');
+            if (resultLayer) view.map.remove(resultLayer);
+            _self.graphicsLayer = new GraphicsLayer({
+                id: 'polygonGraphicLayer',
+                elevationInfo: {
+                    mode: 'on-the-ground',
+                },
+            });
+            view.map.add(_self.graphicsLayer);
+            const polygonSymbol = {
+                type: 'simple-fill',
+                color: 'rgba(216,30,6, 0.4)',
+                style: 'solid',
+                outline: {
+                    color: '#d81e06',
+                    width: 1,
+                },
+            };
+            _self.sketchViewModel = new SketchViewModel({
+                updateOnGraphicClick: false,
+                view,
+                layer: _self.graphicsLayer,
+                polygonSymbol,
+            });
+            console.log('_self.sketchViewModel', _self.sketchViewModel);
+        },
+        //行政区划导航等等功能的控制面板
         handleMapToolsitemClick(event) {
             //  console.log(event.target.id);
             switch (event.target.id) {
@@ -70,61 +114,58 @@ export default {
                     break;
             }
         },
-        //initSpaceQuery 空间查询方法
+        // initSpaceQuery 空间查询方法
         async initSpaceQuery() {
             const _self = this;
             const view = _self.$store.getters._getDefaultView;
-            //1、绘制面状区域
-            const [SketchViewModel, Graphic, GraphicsLayer] = await loadModules(
-                ['esri/widgets/Sketch/SketchViewModel', 'esri/Graphic', 'esri/layers/GraphicsLayer'],
-                options,
-            );
-
+            // //1、绘制面状区域
+            const [Graphic, GraphicsLayer] = await loadModules(['esri/Graphic', 'esri/layers/GraphicsLayer'], options);
             const resultLayer = view.map.findLayerById('polygonGraphicLayer');
             if (resultLayer) {
                 view.map.remove(resultLayer);
             }
-            const graphicsLayer = new GraphicsLayer({
+            _self.graphicsLayer = new GraphicsLayer({
                 id: 'polygonGraphicLayer',
                 elevationInfo: {
-                    mode: 'on-the-ground', //指定图形在垂直轴 (z) 上的放置方式,on-the-ground忽略Z值
+                    mode: 'on-the-ground',
                 },
             });
-            view.map.add(graphicsLayer);
-            //定义面状区域的样式(符号化渲染)
-            const polygonSymbol = {
-                type: 'simple-fill',
-                color: 'rgba(216,30,6,0.4)',
-                style: 'soild',
-                outline: {
-                    color: '#d81e06',
-                    width: 1,
-                },
-            };
+            view.map.add(_self.graphicsLayer);
+            // //定义面状区域的样式(符号化渲染)
+            // const polygonSymbol = {
+            //     type: 'simple-fill',
+            //     color: 'rgba(216,30,6,0.4)',
+            //     style: 'soild',
+            //     outline: {
+            //         color: '#d81e06',
+            //         width: 1,
+            //     },
+            // };
             //自定义草图工具
-            var sketchViewModel = new SketchViewModel({
-                updateOnGraphicClick: false,
-                view,
-                layer: graphicsLayer,
-                polygonSymbol,
-            });
-            sketchViewModel.create('polygon'); //指定绘制的样式
+            // const sketchViewModel = new SketchViewModel({
+            //     updateOnGraphicClick: false,
+            //     view,
+            //     layer: graphicsLayer,
+            //     polygonSymbol,
+            // });
+
+            _self.sketchViewModel.create('polygon'); //指定绘制的样式
             //监听sketchViewModel的状态
-            sketchViewModel.on('create-complete', function (event) {
+            _self.sketchViewModel.on('create-complete', function (event) {
                 const graphic = new Graphic({
                     geometry: event.geometry,
-                    symbol: sketchViewModel.graphic.symbol,
+                    symbol: _self.sketchViewModel.graphic.symbol,
                 });
-                graphicsLayer.add(graphic);
+                _self.graphicsLayer.add(graphic);
             });
             //监听create状态，回调handleSpaceQuery方法去查询要素
-            sketchViewModel.on('create', function (event) {
+            _self.sketchViewModel.on('create', function (event) {
                 if (event.state === 'complete') {
                     _self.handleSpaceQuery(event.graphic);
                 }
             });
         },
-        //2、执行空间查询的方法
+        // 2、执行空间查询的方法
         handleSpaceQuery(graphic) {
             const _self = this;
             const view = _self.$store.getters._getDefaultView;

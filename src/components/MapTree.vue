@@ -63,7 +63,7 @@ export default {
                         {
                             label: '火车站点',
                             layerid: 'layerid1',
-                            layerurl: '	https://localhost:6443/arcgis/rest/services/Map/Station/MapServer',
+                            layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/Station/MapServer',
                         },
                     ],
                 },

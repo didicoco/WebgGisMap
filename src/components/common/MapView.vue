@@ -18,7 +18,7 @@ export default {
     name: 'MapView',
     components: {},
     mounted: function () {
-        console.log(this.$store.getters._getDefaultView);
+        //console.log(this.$store.getters._getDefaultView);
         // console.log(this.$store.state._defaultView);
         this._createMapView(); //生命周期函数，钩子函数，挂载
     },
