@@ -7,8 +7,8 @@
 <script>
 import { loadModules } from 'esri-loader';
 const options = {
-    url: 'https://js.arcgis.com/4.23/init.js',
-    css: 'https://js.arcgis.com/4.23/esri/themes/light/main.css',
+    url: 'https://js.arcgis.com/4.18/init.js',
+    css: 'https://js.arcgis.com/4.18/esri/themes/light/main.css',
 };
 
 export default {
@@ -63,7 +63,7 @@ export default {
                         {
                             label: '火车站点',
                             layerid: 'layerid1',
-                            layerurl: '	https://localhost:6443/arcgis/rest/services/Map/Station/MapServer',
+                            layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/Station/MapServer',
                         },
                     ],
                 },
@@ -81,21 +81,23 @@ export default {
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
                         const resultLayer = view.map.findLayerById('layerid0');
+                        // console.log('resultLayer', resultLayer);
                         if (resultLayer) {
                             view.map.remove(resultLayer);
                         }
                         const [TileLayer] = await loadModules(['esri/layers/TileLayer'], options);
                         //实例化目录树中加载的图层--添加切片地图
-                        const layer = new TileLayer({ url: data.layerurl });
+                        const layer = new TileLayer({ url: data.layerurl, id: data.layerid, label: data.label });
                         view.map.add(layer);
                         // console.log(view.map.allLayers);
-                        console.log('你点了1，用TileLayer加载');
+                        console.log('你加载的TileLayer图层', TileLayer);
                     }
                     break;
                 case 'layerid1':
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
                         const resultLayer = view.map.findLayerById('layerid1');
+                        // console.log('resultLayer', resultLayer);
                         if (resultLayer) {
                             view.map.remove(resultLayer);
                         }
@@ -103,10 +105,12 @@ export default {
                         const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
                         const featureLayer = new FeatureLayer({
                             url: data.layerurl,
+                            id: data.layerid,
+                            label: data.label,
                         });
                         view.map.add(featureLayer);
                         // console.log(view.map.allLayers);
-                        console.log('你点了2，用FeatureLayer加载');
+                        console.log('你加载的FeatureLayer图层', featureLayer);
                     }
                     break;
                 default:

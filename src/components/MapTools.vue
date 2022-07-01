@@ -24,8 +24,8 @@
 <script>
 import { loadModules } from 'esri-loader';
 const options = {
-    url: 'https://js.arcgis.com/4.23/init.js',
-    css: 'https://js.arcgis.com/4.23/esri/themes/light/main.css',
+    url: 'https://js.arcgis.com/4.18/init.js',
+    css: 'https://js.arcgis.com/4.18/esri/themes/light/main.css',
 };
 export default {
     name: 'MapTools',
@@ -95,7 +95,7 @@ export default {
             const polygonSymbol = {
                 type: 'simple-fill',
                 color: 'rgba(216,30,6,0.4)',
-                style: 'soild',
+                style: 'solid',
                 outline: {
                     color: '#d81e06',
                     width: 1,
@@ -129,6 +129,7 @@ export default {
             const _self = this;
             const view = _self.$store.getters._getDefaultView;
             const resultLayer = view.map.findLayerById('layerid1');
+            // const resultLayer = view.map.allLayers._items[1];(找不到ID时的替代方法)
             if (!resultLayer) {
                 _self.$message({
                     message: '尚未添加业务图层，不能进行空间查询',
@@ -138,41 +139,47 @@ export default {
             }
             const queryPoint = resultLayer.createQuery();
             queryPoint.geometry = graphic.geometry;
-            resultLayer.queryFeatures(queryPoint).then(function (results) {
-                let currentData = [];
-                if (results.features.length > 0) {
-                    //符号化渲染图层
-                    _self.renderResultLayer(results.features);
-                    //符号化表格数据
-                    results.features.map((item, index) => {
-                        currentData.push({
-                            name: item.attributes.name,
-                            type: item.attributes.type,
-                            tieluju: item.attributes.tieluju,
-                            address: item.attributes.address,
-                            lon: item.attributes.lon,
-                            lat: item.attributes.lat,
-                            key: index,
+            resultLayer
+                .queryFeatures(queryPoint)
+                .then(function (results) {
+                    let currentData = [];
+                    if (results.features.length > 0) {
+                        //符号化渲染图层
+                        _self.renderResultLayer(results.features);
+                        //符号化表格数据
+                        results.features.map((a, b) => {
+                            currentData.push({
+                                name: a.attributes.name,
+                                type: a.attributes.type,
+                                tieluju: a.attributes.tieluju,
+                                address: a.attributes.address,
+                                lon: a.attributes.lon,
+                                lat: a.attributes.lat,
+                                key: b,
+                            });
                         });
+                        // console.log('currentData', currentData);
+                        // console.log('results.features', results.features);
+                    } else {
+                        currentData.length = 0;
+                    }
+                    _self.$message({
+                        message: `查询成功，共查到 ${results.features.length}条数据`,
+                        type: 'success',
                     });
-                } else {
-                    currentData.length = 0;
-                }
-                _self.$message({
-                    message: `查询成功，共查到 ${results.features.length}条数据`,
-                    type: 'success',
+                    _self.$store.commit('_setDefaultQueryResult', currentData);
+                    _self.$store.commit('_setDefaultQueryResultVisible', true);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    _self.$message.error('空间查询失败，请联系管理员');
                 });
-                _self.$store.commit('_setDefaultQueryResult', currentData);
-                _self.$store.commit('_setDefaultQueryResultVisible', true);
-            });
         },
         async renderResultLayer(resultFeatures) {
             const view = this.$store.getters._getDefaultView;
             const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
-
             const resultLayer = view.map.findLayerById('initResultLayer');
             if (resultLayer) view.map.remove(resultLayer);
-
             const resultData = this._translateLonLat(resultFeatures);
             //实例化弹窗
             let template = {
@@ -204,7 +211,7 @@ export default {
             const queryResultLayer = new FeatureLayer({
                 source: resultData,
                 id: 'initResultLayer',
-                ObjectIdField: 'objectID',
+                ObjectIdField: 'ObjectID',
                 renderer: {
                     type: 'simple',
                     symbol: {
@@ -245,7 +252,7 @@ export default {
             if (data.length > 0) {
                 _self.geoData = [];
                 data.map((value, key) => {
-                    _self.geoData.Push({
+                    _self.geoData.push({
                         geometry: {
                             //geometry的结构是固定死的,必须要有这3项
                             type: 'point',
