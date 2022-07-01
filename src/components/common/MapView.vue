@@ -11,14 +11,14 @@
 import { loadModules } from 'esri-loader';
 
 const options = {
-    url: 'https://js.arcgis.com/4.23/init.js',
-    css: 'https://js.arcgis.com/4.23/esri/themes/light/main.css',
+    url: 'https://js.arcgis.com/4.18/init.js',
+    css: 'https://js.arcgis.com/4.18/esri/themes/light/main.css',
 }; //1.引入ArcGis for js的API
 export default {
     name: 'MapView',
     components: {},
     mounted: function () {
-        console.log(this.$store.getters._getDefaultView);
+        // console.log(this.$store.getters._getDefaultView);
         // console.log(this.$store.state._defaultView);
         this._createMapView(); //生命周期函数，钩子函数，挂载
     },
