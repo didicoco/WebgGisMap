@@ -23,9 +23,10 @@
 
 <script>
 import { loadModules } from 'esri-loader';
+
 const options = {
-    url: 'https://js.arcgis.com/4.23/init.js',
-    css: 'https://js.arcgis.com/4.23/esri/themes/light/main.css',
+    url: 'https://js.arcgis.com/4.18/init.js',
+    css: 'https://js.arcgis.com/4.18/esri/themes/light/main.css',
 };
 export default {
     name: 'MapTools',
@@ -95,7 +96,7 @@ export default {
             const polygonSymbol = {
                 type: 'simple-fill',
                 color: 'rgba(216,30,6,0.4)',
-                style: 'soild',
+                style: 'solid',
                 outline: {
                     color: '#d81e06',
                     width: 1,
@@ -127,8 +128,14 @@ export default {
         //2、执行空间查询的方法
         handleSpaceQuery(graphic) {
             const _self = this;
-            const view = _self.$store.getters._getDefaultView;
+            const view = this.$store.getters._getDefaultView;
+            console.log(view);
             const resultLayer = view.map.findLayerById('layerid1');
+
+            // const resultLayer = view.map.allLayers._items[1];
+
+            console.log(resultLayer);
+
             if (!resultLayer) {
                 _self.$message({
                     message: '尚未添加业务图层，不能进行空间查询',

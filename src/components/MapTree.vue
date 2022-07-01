@@ -1,3 +1,5 @@
+/* eslint-disable no-debugger */
+/* eslint-disable no-debugger */
 <template>
     <div class="maptree-pannel" v-show="this.$store.getters._getDefaultMapTreeVisible">
         <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
@@ -7,8 +9,8 @@
 <script>
 import { loadModules } from 'esri-loader';
 const options = {
-    url: 'https://js.arcgis.com/4.23/init.js',
-    css: 'https://js.arcgis.com/4.23/esri/themes/light/main.css',
+    url: 'https://js.arcgis.com/4.18/init.js',
+    css: 'https://js.arcgis.com/4.18/esri/themes/light/main.css',
 };
 
 export default {
@@ -22,17 +24,17 @@ export default {
                     children: [
                         {
                             label: '原底图',
-                            layerid: 'layerid0',
+                            layerId: 'layerid0',
                             layerurl: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
                         },
                         {
                             label: '暖色系图层',
-                            layerid: 'layerid0',
+                            layerId: 'layerid0',
                             layerurl: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetWarm/MapServer',
                         },
                         {
                             label: '灰色系图层',
-                            layerid: 'layerid0',
+                            layerId: 'layerid0',
                             layerurl: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetGray/MapServer',
                         },
                     ],
@@ -42,17 +44,17 @@ export default {
                     children: [
                         {
                             label: '省级',
-                            layerid: 'layerid1',
+                            layerId: 'layerid1',
                             layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/2',
                         },
                         {
                             label: '市级',
-                            layerid: 'layerid1',
+                            layerId: 'layerid1',
                             layerurl: 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/1',
                         },
                         {
                             label: '县级',
-                            layerid: 'layerid1',
+                            layerId: 'layerid1',
                             layerurl: 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0',
                         },
                     ],
@@ -62,8 +64,8 @@ export default {
                     children: [
                         {
                             label: '火车站点',
-                            layerid: 'layerid1',
-                            layerurl: '	https://localhost:6443/arcgis/rest/services/Map/Station/MapServer',
+                            layerId: 'layerid2',
+                            layerurl: 'https://localhost:6443/arcgis/rest/services/Map/Station/MapServer',
                         },
                     ],
                 },
@@ -76,7 +78,8 @@ export default {
     },
     methods: {
         async handleNodeClick(data) {
-            switch (data.layerid) {
+            console.log(this);
+            switch (data.layerId) {
                 case 'layerid0':
                     if (data.layerurl) {
                         const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
@@ -86,10 +89,12 @@ export default {
                         }
                         const [TileLayer] = await loadModules(['esri/layers/TileLayer'], options);
                         //实例化目录树中加载的图层--添加切片地图
-                        const layer = new TileLayer({ url: data.layerurl });
+                        const layer = new TileLayer({ url: data.layerurl, id: data.layerId });
                         view.map.add(layer);
                         // console.log(view.map.allLayers);
                         console.log('你点了1，用TileLayer加载');
+                        const layerid0 = view.map.findLayerById('layerid0');
+                        console.log(layerid0);
                     }
                     break;
                 case 'layerid1':
@@ -102,13 +107,40 @@ export default {
                         //实例化目录树中加载的图层--添加要素地图
                         const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
                         const featureLayer = new FeatureLayer({
+                            id: data.layerId,
                             url: data.layerurl,
                         });
                         view.map.add(featureLayer);
-                        // console.log(view.map.allLayers);
-                        console.log('你点了2，用FeatureLayer加载');
                     }
                     break;
+                case 'layerid2':
+                    if (data.layerurl) {
+                        const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
+                        const resultLayer = view.map.findLayerById('layerid2');
+                        if (resultLayer) {
+                            view.map.remove(resultLayer);
+                        }
+                        //实例化目录树中加载的图层--添加要素地图
+                        const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
+                        const featureLayer = new FeatureLayer({
+                            url: data.layerurl,
+                        });
+                        view.map.add(featureLayer);
+                        console.log(this);
+
+                        console.log('view');
+                        console.log(view);
+                        console.log('你点了2，用FeatureLayer加载');
+
+                        const layerid1 = view.map.findLayerById('999');
+                        view.map.findLayerById('999');
+                        console.log(featureLayer);
+
+                        console.log('999');
+                        console.log(layerid1);
+                    }
+                    break;
+
                 default:
                     break;
             }
