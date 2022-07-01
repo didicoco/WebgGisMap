@@ -189,19 +189,19 @@ export default {
                         type: 'fields',
                         fieldInfos: [
                             {
-                                filedName: 'name',
+                                fieldName: 'name',
                                 label: '名称',
                             },
                             {
-                                filedName: 'type',
+                                fieldName: 'type',
                                 label: '类型',
                             },
                             {
-                                filedName: 'tieluju',
+                                fieldName: 'tieluju',
                                 label: '铁路局',
                             },
                             {
-                                filedName: 'address',
+                                fieldName: 'address',
                                 label: '地址',
                             },
                         ],
@@ -268,6 +268,7 @@ export default {
                         },
                     });
                 });
+                // console.log(_self.geoData);
             }
             return _self.geoData;
         },
