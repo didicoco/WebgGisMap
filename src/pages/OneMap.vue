@@ -14,6 +14,7 @@ import MapTools from '../components/MapTools';
 import MapTree from '../components/MapTree';
 import XZQHComponent from '../components/XZQHComponent';
 import ResultTable from './../components/ResultTable';
+
 export default {
     name: 'OneMap',
     components: {

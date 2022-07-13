@@ -24,16 +24,8 @@ export default {
     },
     methods: {
         async _createMapView() {
-            const [Map, MapView, Basemap, TileLayer, BasemapToggle, ScaleBar, Zoom] = await loadModules(
-                [
-                    'esri/Map',
-                    'esri/views/MapView',
-                    'esri/Basemap',
-                    'esri/layers/TileLayer',
-                    'esri/widgets/BasemapToggle',
-                    'esri/widgets/ScaleBar',
-                    'esri/widgets/Zoom',
-                ],
+            const [Map, MapView, Basemap, TileLayer] = await loadModules(
+                ['esri/Map', 'esri/views/MapView', 'esri/Basemap', 'esri/layers/TileLayer'],
                 options,
             ); //2.加载模块
             //3.实例化地图
@@ -59,32 +51,6 @@ export default {
                 center: [118.790024, 32.048483],
             });
 
-            //实例化地图切换控件
-            const basemapToggle = new BasemapToggle({
-                view: mapview,
-                nextBasemap: 'hybrid',
-                container: 'basemapToggle',
-            });
-            //添加地图控件方法一：
-            // mapview.ui.add(basemapToggle, {
-            //     position: 'bottom-right',//可选值只有四个：左上角top-left，左下角bottom-left，右上角top-right，右下角bottom-right。
-            // });
-            //添加地图控件方法二:
-            mapview.ui.add(basemapToggle); //basemapToggle绑定的是页面DOM的位置,要配合container属性使用,好处是可以用CSS控制自定义位置
-            //实例化比例尺
-            const scaleBar = new ScaleBar({
-                view: mapview,
-                container: 'scaleBar',
-                unit: 'metric',
-            });
-            // Add widget to the bottom left corner of the view
-            mapview.ui.add(scaleBar);
-            //实例化地图缩放控件
-            const zoom = new Zoom({
-                view: mapview,
-                container: 'zoom',
-            });
-            mapview.ui.add(zoom);
             mapview.ui.components = [];
             this.$store.commit('_setDefaultView', mapview); //把mapview配置到VUEX里，index.js，公共的view
         },

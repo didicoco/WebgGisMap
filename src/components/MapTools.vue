@@ -63,6 +63,7 @@ export default {
                     this.initSpaceQuery();
                     break;
                 case 'morescreen':
+                    this.$router.push('/onemap/one');
                     break;
                 case 'swipanalyst':
                     break;
