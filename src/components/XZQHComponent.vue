@@ -156,7 +156,7 @@ export default {
                 serverUrl = 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/1';
             } else if (type === 'county') {
                 code = val.toString().substring(0, 6);
-                serverUrl = 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0';
+                serverUrl = 'http://localhost:6080/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/0'; //wkid是53004
             }
             const [QueryTask, Query, Graphic] = await loadModules(
                 ['esri/tasks/QueryTask', 'esri/tasks/support/Query', 'esri/Graphic'],
@@ -192,12 +192,12 @@ export default {
             });
             view.graphics.add(graphic);
             console.log('graphic', graphic);
-
+            console.log('featuresResult', featuresResult);
             const screenPoint = {
                 x: featuresResult.geometry.extent.center.x,
                 y: featuresResult.geometry.extent.center.y,
                 spatialReference: {
-                    wkid: 3857, //网络墨卡托投影
+                    wkid: 3857, //3857是网络墨卡托
                 },
             };
             console.log('screenPoint', screenPoint);
@@ -208,7 +208,7 @@ export default {
                 x: mapPoint.x,
                 y: mapPoint.y,
                 spatialReference: {
-                    wkid: 3857, //4326：GCS_WGS_1984
+                    wkid: 4326, //4326：GCS_WGS_1984
                 },
             };
             const screenPoint1 = view.toMap(mapPoint1); //将给定的屏幕点转换为地图点
