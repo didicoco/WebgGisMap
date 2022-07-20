@@ -65,6 +65,16 @@ export default {
                             layerid: 'layerid1',
                             layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/Station/MapServer',
                         },
+                        {
+                            label: '卷帘分析top',
+                            layerid: 'swipeLayerTop',
+                            layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/2',
+                        },
+                        {
+                            label: '卷帘分析bottom',
+                            layerid: 'swipeLayerBottom',
+                            layerurl: 'https://localhost:6443/arcgis/rest/services/ChinaMap/ChinaMap_total/MapServer/1',
+                        },
                     ],
                 },
             ],
@@ -110,6 +120,34 @@ export default {
                         });
                         view.map.add(featureLayer);
                         // console.log(view.map.allLayers);
+                        console.log('你加载的FeatureLayer图层', featureLayer);
+                    }
+                    break;
+                case 'swipeLayerTop':
+                    if (data.layerurl) {
+                        const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
+                        //实例化目录树中加载的图层--添加要素地图
+                        const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
+                        const featureLayer = new FeatureLayer({
+                            url: data.layerurl,
+                            id: data.layerid,
+                            label: data.label,
+                        });
+                        view.map.add(featureLayer);
+                        console.log('你加载的FeatureLayer图层', featureLayer);
+                    }
+                    break;
+                case 'swipeLayerBottom':
+                    if (data.layerurl) {
+                        const view = this.$store.getters._getDefaultView; //通过VUEX获得公共的view
+                        //实例化目录树中加载的图层--添加要素地图
+                        const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
+                        const featureLayer = new FeatureLayer({
+                            url: data.layerurl,
+                            id: data.layerid,
+                            label: data.label,
+                        });
+                        view.map.add(featureLayer);
                         console.log('你加载的FeatureLayer图层', featureLayer);
                     }
                     break;
