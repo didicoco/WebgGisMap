@@ -73,7 +73,7 @@ export default {
                     this._initSwipe();
                     break;
                 case 'printmap':
-                    this.printmap();
+                    this.PrintMap();
                     break;
                 default:
                     break;
@@ -308,43 +308,40 @@ export default {
             }
         },
         //3、地图打印功能
-        async printmap() {
+        async PrintMap() {
             const _self = this;
             const view = _self.$store.getters._getDefaultView;
-            const [Print] = await loadModules(['esri/widgets/Print'], options);
-            if (this.print) this.print.destroy();
-
-            this.print = new Print({
+            const [PrintTask, PrintTemplate, PrintParameters] = await loadModules(
+                ['esri/tasks/PrintTask', 'esri/tasks/support/PrintTemplate', 'esri/tasks/support/PrintParameters'],
+                options,
+            );
+            let printTask = new PrintTask({
+                url: 'https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task',
+            });
+            let template = new PrintTemplate({
+                format: 'pdf',
+                exportOptions: {
+                    dpi: 100,
+                },
+                layout: 'a4-portrait',
+                layoutOptions: {
+                    titleText: '地图出图demo',
+                    authorText: 'lyw',
+                    scalebarUnit: 'Kilometers',
+                    customTextElements: [{ location: '江苏省 徐州市' }, { date: '08/11/2021, 08:20:20 AM' }],
+                },
+            });
+            let params = new PrintParameters({
                 view: view,
-                // specify your own print service
-                printServiceUrl:
-                    'https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task', //官网参考的
-                container: 'dtdy',
-                id: 'print',
+                template: template,
             });
-            view.ui.add(this.print, {
-                position: 'top-left',
+            printTask.execute(params).then((printResult, printError) => {
+                console.log(printResult, printError);
+                if (printResult.url) window.open(printResult.url);
+                if (printError) this.$message.error('地图打印失败');
             });
-            /////////////
-            // if (this.print) {
-            //     console.log('已经存在');
-            // } else {
-            //     this.print = new Print({
-            //         view: view,
-            //         // specify your own print service
-            //         printServiceUrl:
-            //             'https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task', //官网参考的
-            //         container: 'dtdy',
-            //         id: 'print',
-            //     });
-            //     console.log(this.print);
-
-            //     // Adds widget below other elements in the top left corner of the view
-            //     view.ui.add(this.print, {
-            //         position: 'top-left',
-            //     });
-            // }
         },
+
         //4、地图测量功能
         async initDistanceMap() {
             const _self = this;
