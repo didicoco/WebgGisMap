@@ -15,9 +15,11 @@
                 <el-dropdown-item icon="el-icon-search" command="spacequery">空间查询</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-film" command="morescreen">多屏对比</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-reading" command="swipanalyst">卷帘分析</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-printer" command="printmap">地图打印</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown>
         <span class="maptools-item" @click="handleMapToolsitemClick" id="clear">清屏</span>
+        <div id="dtdy"></div>
     </div>
 </template>
 
@@ -56,8 +58,10 @@ export default {
         handleCommand(command) {
             switch (command) {
                 case 'distance':
+                    this.initDistanceMap();
                     break;
                 case 'area':
+                    this.initAreaMap();
                     break;
                 case 'spacequery':
                     this.initSpaceQuery();
@@ -66,16 +70,20 @@ export default {
                     this.$router.push('/onemap/one');
                     break;
                 case 'swipanalyst':
+                    this._initSwipe();
+                    break;
+                case 'printmap':
+                    this.printmap();
                     break;
                 default:
                     break;
             }
         },
-        //initSpaceQuery 空间查询方法
+        //1、initSpaceQuery 空间查询功能
+        //1.1、绘制面状区域
         async initSpaceQuery() {
             const _self = this;
             const view = _self.$store.getters._getDefaultView;
-            //1、绘制面状区域
             const [SketchViewModel, Graphic, GraphicsLayer] = await loadModules(
                 ['esri/widgets/Sketch/SketchViewModel', 'esri/Graphic', 'esri/layers/GraphicsLayer'],
                 options,
@@ -92,7 +100,7 @@ export default {
                 },
             });
             view.map.add(graphicsLayer);
-            //定义面状区域的样式(符号化渲染)
+            //1.2 定义面状区域的样式(符号化渲染)
             const polygonSymbol = {
                 type: 'simple-fill',
                 color: 'rgba(216,30,6,0.4)',
@@ -102,7 +110,7 @@ export default {
                     width: 1,
                 },
             };
-            //自定义草图工具
+            // 1.3 自定义草图工具
             var sketchViewModel = new SketchViewModel({
                 updateOnGraphicClick: false,
                 view,
@@ -110,7 +118,7 @@ export default {
                 polygonSymbol,
             });
             sketchViewModel.create('polygon'); //指定绘制的样式
-            //监听sketchViewModel的状态
+            // 1.4 监听sketchViewModel的状态
             sketchViewModel.on('create-complete', function (event) {
                 const graphic = new Graphic({
                     geometry: event.geometry,
@@ -118,14 +126,14 @@ export default {
                 });
                 graphicsLayer.add(graphic);
             });
-            //监听create状态，回调handleSpaceQuery方法去查询要素
+            //1.5 监听create状态，回调handleSpaceQuery方法去查询要素
             sketchViewModel.on('create', function (event) {
                 if (event.state === 'complete') {
                     _self.handleSpaceQuery(event.graphic);
                 }
             });
         },
-        //2、执行空间查询的方法
+        //1.6、执行空间查询的方法
         handleSpaceQuery(graphic) {
             const _self = this;
             const view = _self.$store.getters._getDefaultView;
@@ -176,6 +184,7 @@ export default {
                     _self.$message.error('空间查询失败，请联系管理员');
                 });
         },
+        //1.7、生成查询结果图层
         async renderResultLayer(resultFeatures) {
             const view = this.$store.getters._getDefaultView;
             const [FeatureLayer] = await loadModules(['esri/layers/FeatureLayer'], options);
@@ -248,6 +257,7 @@ export default {
             });
             view.map.add(queryResultLayer);
         },
+        //1.8、查询数据遍历
         _translateLonLat(data) {
             const _self = this;
             if (data.length > 0) {
@@ -272,6 +282,90 @@ export default {
                 // console.log(_self.geoData);
             }
             return _self.geoData;
+        },
+        //2、卷帘分析功能
+        async _initSwipe() {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultView;
+            const [Swipe] = await loadModules(['esri/widgets/Swipe'], options);
+            const topLayer = view.map.findLayerById('swipeLayerTop');
+            const bottomLayer = view.map.findLayerById('swipeLayerBottom');
+            if (topLayer && bottomLayer) {
+                _self.swipe = new Swipe({
+                    leadingLayers: [topLayer],
+                    trailingLayers: [bottomLayer],
+                    position: 35,
+                    view: view,
+                    direction: 'vertical',
+                });
+                view.ui.add(_self.swipe);
+            } else {
+                _self.$message({
+                    message: '请添加至少两张业务图层',
+                    type: 'warning',
+                });
+                return;
+            }
+        },
+        //3、地图打印功能
+        async printmap() {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultView;
+            const [Print] = await loadModules(['esri/widgets/Print'], options);
+            if (this.print) this.print.destroy();
+
+            this.print = new Print({
+                view: view,
+                // specify your own print service
+                printServiceUrl:
+                    'https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task', //官网参考的
+                container: 'dtdy',
+                id: 'print',
+            });
+            view.ui.add(this.print, {
+                position: 'top-left',
+            });
+            /////////////
+            // if (this.print) {
+            //     console.log('已经存在');
+            // } else {
+            //     this.print = new Print({
+            //         view: view,
+            //         // specify your own print service
+            //         printServiceUrl:
+            //             'https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task', //官网参考的
+            //         container: 'dtdy',
+            //         id: 'print',
+            //     });
+            //     console.log(this.print);
+
+            //     // Adds widget below other elements in the top left corner of the view
+            //     view.ui.add(this.print, {
+            //         position: 'top-left',
+            //     });
+            // }
+        },
+        //4、地图测量功能
+        async initDistanceMap() {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultView;
+            const [DistanceMeasurement2D] = await loadModules(['esri/widgets/DistanceMeasurement2D'], options);
+            if (this.measurementWidge) this.measurementWidge.destroy();
+            this.measurementWidge = new DistanceMeasurement2D({
+                view,
+            });
+            view.ui.add(this.measurementWidge, 'top-left');
+        },
+        //5、面积测量功能
+        async initAreaMap() {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultView;
+            const [AreaMeasurement2D] = await loadModules(['esri/widgets/AreaMeasurement2D'], options);
+            if (this.measurementWidge) this.measurementWidge.destroy();
+            this.measurementWidge = new AreaMeasurement2D({
+                view,
+            });
+            view.ui.add(this.measurementWidge, 'top-left');
         },
     },
 };
@@ -298,5 +392,10 @@ export default {
 }
 .el-dropdown-link {
     font-size: 16px;
+}
+#dtdy {
+    position: absolute;
+    top: 200px;
+    left: 200px;
 }
 </style>

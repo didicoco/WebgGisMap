@@ -26,6 +26,7 @@ const getters = {
     _getDefaultQueryResult() {
         return state._defaultQueryResult;
     },
+
 };
 
 const mutations = {
@@ -44,6 +45,7 @@ const mutations = {
     _setDefaultQueryResult(state, value) {
         state._defaultQueryResult = value;
     },
+
 };
 
 const store = new Vuex.Store({
