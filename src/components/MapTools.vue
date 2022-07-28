@@ -57,6 +57,7 @@ export default {
                 case 'area':
                     break;
                 case 'clear':
+                    this.handleClearMap();
                     break;
                 default:
                     break;
@@ -519,6 +520,20 @@ export default {
                     type: 'warning',
                 });
             }
+        },
+        //8、清屏功能
+        handleClearMap() {
+            const view = this.$store.getters._getDefaultView;
+            const resultLayer1 = view.map.findLayerById('swipeLayerTop');
+            const resultLayer2 = view.map.findLayerById('swipeLayerBottom');
+            const resultLayer3 = view.map.findLayerById('layerid1');
+            const resultLayer4 = view.map.findLayerById('measurementGraphicLayer');
+            if (resultLayer1) view.map.remove(resultLayer1);
+            if (resultLayer2) view.map.remove(resultLayer2);
+            if (resultLayer3) view.map.remove(resultLayer3);
+            if (resultLayer4) view.map.remove(resultLayer4);
+            if (this.swipe) this.swipe.destroy();
+            if (this.measurementWidget) this.measurementWidget.destroy();
         },
     },
 };
