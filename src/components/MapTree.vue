@@ -119,7 +119,8 @@ export default {
                             label: data.label,
                         });
                         view.map.add(featureLayer);
-                        // console.log(view.map.allLayers);
+                        console.log(view.map.allLayers);
+                        // this.$store.commit('_setDefaultView', view);
                         console.log('你加载的FeatureLayer图层', featureLayer);
                     }
                     break;
