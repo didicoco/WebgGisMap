@@ -7,6 +7,12 @@
             <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item icon="el-icon-plus" command="distance">距离测量</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-circle-plus" command="area">面积测量</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-plus" command="diymeasurement_distance"
+                    >自定义测量长度</el-dropdown-item
+                >
+                <el-dropdown-item icon="el-icon-circle-plus" command="diymeasurement_area"
+                    >自定义测量面积</el-dropdown-item
+                >
             </el-dropdown-menu>
         </el-dropdown>
         <el-dropdown trigger="click" class="maptools-item" @command="handleCommand">
@@ -16,6 +22,7 @@
                 <el-dropdown-item icon="el-icon-film" command="morescreen">多屏对比</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-reading" command="swipanalyst">卷帘分析</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-printer" command="printmap">地图打印</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-view" command="openPopup">开启图层弹窗</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown>
         <span class="maptools-item" @click="handleMapToolsitemClick" id="clear">清屏</span>
@@ -74,6 +81,15 @@ export default {
                     break;
                 case 'printmap':
                     this.PrintMap();
+                    break;
+                case 'diymeasurement_distance':
+                    this.initDIYMeasurement('distance');
+                    break;
+                case 'diymeasurement_area':
+                    this.initDIYMeasurement('area');
+                    break;
+                case 'openPopup':
+                    this.openMapPopup();
                     break;
                 default:
                     break;
@@ -323,12 +339,11 @@ export default {
                 exportOptions: {
                     dpi: 100,
                 },
-                layout: 'a4-portrait',
+                layout: 'a3-portrait',
                 layoutOptions: {
                     titleText: '地图出图demo',
-                    authorText: 'lyw',
+                    authorText: 'hd',
                     scalebarUnit: 'Kilometers',
-                    customTextElements: [{ location: '江苏省 徐州市' }, { date: '08/11/2021, 08:20:20 AM' }],
                 },
             });
             let params = new PrintParameters({
@@ -363,6 +378,147 @@ export default {
                 view,
             });
             view.ui.add(this.measurementWidge, 'top-left');
+        },
+        //6、自定义测量功能
+        async initDIYMeasurement(type) {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultView;
+            const resultLayer = view.map.findLayerById('measurementGraphicLayer');
+            if (resultLayer) view.map.remove(resultLayer);
+            const [
+                SketchViewModel,
+                Graphic,
+                GraphicsLayer,
+                GeometryService,
+                LengthsParameters,
+                AreasAndLengthsParameters,
+            ] = await loadModules(
+                [
+                    'esri/widgets/Sketch/SketchViewModel',
+                    'esri/Graphic',
+                    'esri/layers/GraphicsLayer',
+                    'esri/tasks/GeometryService',
+                    'esri/tasks/support/LengthsParameters',
+                    'esri/tasks/support/AreasAndLengthsParameters',
+                ],
+                options,
+            );
+            const graphicsLayer = new GraphicsLayer({
+                id: 'measurementGraphicLayer',
+                elevationInfo: {
+                    mode: 'on-the-ground',
+                },
+            });
+            view.map.add(graphicsLayer);
+
+            if (type === 'distance') {
+                const polylineSymbol = {
+                    type: 'simple-line',
+                    color: '#d81e06',
+                    width: '2',
+                    style: 'solid',
+                };
+                const sketchViewModel = new SketchViewModel({
+                    updateOnGraphicClick: false,
+                    view: view,
+                    layer: graphicsLayer,
+                    polylineSymbol,
+                });
+                sketchViewModel.create('polyline');
+                sketchViewModel.on('create-complete', function (event) {
+                    const graphic = new Graphic({
+                        geometry: event.geometry,
+                        symbol: sketchViewModel.graphic.symbol,
+                    });
+                    graphicsLayer.add(graphic);
+                });
+                sketchViewModel.on('create', function (event) {
+                    if (event.state === 'complete') {
+                        console.log(graphicsLayer);
+                        console.log(event);
+
+                        //获取线段长度
+                        const geometryService = new GeometryService({
+                            url: 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer',
+                        });
+                        const lengthsParameters = new LengthsParameters();
+                        lengthsParameters.polylines = event.graphic.geometry;
+                        lengthsParameters.lengthUnit = 9036; //9036代表公里(km)的编码,9001:m
+                        lengthsParameters.geodesic = true;
+
+                        geometryService.lengths(lengthsParameters).then(function (result) {
+                            console.log('长度', result);
+                        });
+                    }
+                });
+            } else if (type === 'area') {
+                const polygonSymbol = {
+                    type: 'simple-fill',
+                    color: 'rgba(216,30,6,0.4)',
+                    style: 'solid',
+                    outline: {
+                        color: '#d81e06',
+                        width: 1,
+                    },
+                };
+                const sketchViewModel = new SketchViewModel({
+                    updateOnGraphicClick: false,
+                    view: view,
+                    layer: graphicsLayer,
+                    polygonSymbol,
+                });
+                sketchViewModel.create('polygon');
+
+                sketchViewModel.on('create-complete', function (event) {
+                    const graphic = new Graphic({
+                        geometry: event.geometry,
+                        symbol: sketchViewModel.graphic.symbol,
+                    });
+                    graphicsLayer.add(graphic);
+                });
+                sketchViewModel.on('create', function (event) {
+                    if (event.state === 'complete') {
+                        console.log('graphicsLayer', graphicsLayer);
+                        console.log(event);
+                        //获取周长和面积
+                        const geometryService = new GeometryService({
+                            url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer',
+                        });
+                        const areasAndLengthsParameters = new AreasAndLengthsParameters();
+                        areasAndLengthsParameters.polygons = event.graphic.geometry;
+                        areasAndLengthsParameters.areaUnit = 'square-kilometers';
+                        areasAndLengthsParameters.lengthUnit = 'kilometers';
+
+                        geometryService.areasAndLengths(areasAndLengthsParameters).then(function (result) {
+                            console.log('周长和面积', result);
+                        });
+                    }
+                });
+            }
+        },
+        //7、开启图层弹窗功能
+        openMapPopup() {
+            const _self = this;
+            const view = _self.$store.getters._getDefaultView;
+            const resultLayer = view.map.findLayerById('layerid1');
+            if (resultLayer) {
+                view.on('click', function (event) {
+                    view.hitTest(event).then(function (response) {
+                        console.log('1', response);
+                        if (response.results.length) {
+                            let graphic = response.results.filter(function (result) {
+                                return result.graphic.layer.id === 'layerid1';
+                            })[0].graphic;
+                            console.log(graphic.attributes);
+                        }
+                    });
+                });
+            } else {
+                _self.$message({
+                    message: '请添加业务图层',
+                    type: 'warning',
+                });
+            }
         },
     },
 };

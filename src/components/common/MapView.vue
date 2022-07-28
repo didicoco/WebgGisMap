@@ -176,8 +176,8 @@ export default {
 }
 #compass {
     position: absolute;
-    left: 20px;
-    top: 20px;
+    right: 30px;
+    bottom: 240px;
 }
 .view-change {
     position: absolute;
