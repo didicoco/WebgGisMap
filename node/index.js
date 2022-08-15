@@ -1,7 +1,9 @@
 var express = require('express');//异步调用，AMD
 var app = express();//express方法的调用生成一个app实例
+var bodyParser = require('body-parser');
 var user = require('./routers/user');
 var home = require('./routers/home');
+
 //设置跨域访问（一般是后端处理跨域，前端可以用代理解决跨域）
 app.all("*", function (req, res, next) {
     //设置允许跨域的域名，*代表允许任意域名跨域
@@ -15,6 +17,10 @@ app.all("*", function (req, res, next) {
     next();
 })
 
+app.use(bodyParser.urlencoded({//配置post接口需要的插件bodyParser
+    extended: true
+}));
+app.use(bodyParser.json());
 
 app.use('/', home);
 app.use('/user', user);

@@ -36,14 +36,18 @@ router.get('/get', function (req, res) {
 
 //用户注册接口
 router.post('/insert', function (req, res) {
-    var client = new pg.Client(pgConfig);
+    var name = req.body.name;//获取前端传回来的用户名
+    var psd = req.body.psd;
+    var phone = req.body.phone;
+    var email = req.body.email;
+    var client = new pg.Client(pgConfig);//连接PG数据库
     client.connect(function (isErr) {
         if (isErr) {
             console.log('connect error' + isErr.message);
             client.end();
             return;
         }
-        client.query('INSERT INTO public."user" (name, password, phone, email) VALUES ($1, $2, $3, $4)', ['xie', '123456', '17625922185', '398514470@qq.com'], function (isErr, rst) {
+        client.query('INSERT INTO public."user" (name, password, phone, email) VALUES ($1, $2, $3, $4)', [name, psd, phone, email], function (isErr, rst) {
             if (isErr) {
                 console.log('insert error:' + isErr.message);
                 res.send({
